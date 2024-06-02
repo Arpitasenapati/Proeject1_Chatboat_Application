@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>chat application</title>
+    <script defer src="http://127.0.0.1:5500/socket.io/socket.io.js"></script>
+    <script defer src="client.js"></script>
+    <!-- index.html -->
+<script>
+    fetch('http://127.0.0.1:5500//socket.io/?EIO=4&transport=polling&t=OweYOGt')
+        .then(response => response.text())
+        .then(data => console.log(message))
+        .catch(error => console.error('Error fetching data:', error));
+</script>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav>
+        <img class="logo" src="OIP.jpg" alt="">
+    </nav>
+    <div class="container" id="messageContainer">
+       <div class="message right">Ariii: hey how are you?</div>
+       <div class="message left">Rohan: I am fine .</div>
+    </div>
+
+    <div class="send">
+        <form action="#" id="send-container">
+            <input type="text" id="username" placeholder="Enter your name">
+            <input type="text" id="messageInp" placeholder="Type a message...">
+            <button type="submit">Send</button>
+        </form>
+    </div>
+</body>
+</html>

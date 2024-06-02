@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Application</title>
+    <script defer src="http://localhost:8000/socket.io/socket.io.js"></script>
+    <script defer src="client.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav>
+        <img class="logo" src="OIP.jpg" alt="Chat Logo">
+    </nav>
+    <div class="container" id="messageContainer">
+        <!-- Display chat messages here -->
+    </div>
+    <div class="send">
+        <form id="send-container">
+            <input type="text" id="username" placeholder="Enter your name">
+            <input type="text" id="messageInp" placeholder="Type a message...">
+            <button type="submit">Send</button>
+        </form>
+    </div>
+</body>
+</html>
+
+
+
+client.js:
+// client.js
+const socket = io.connect('http://localhost:8000');
+const form = document.getElementById('send-container');
+const messageInput = document.getElementById('messageInp');
+const messageContainer = document.getElementById('messageContainer');
+
+const appendMessage = (message, position) => {
+    const messageElement = document.createElement('div');
+    messageElement.innerText = message;
+    messageElement.classList.add('message', position);
+    messageContainer.appendChild(messageElement);
+};
+
+form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const message = messageInput.value;
+    appendMessage(`You: ${message}`, 'right');
+    socket.emit('send', message);
+    messageInput.value = '';
+});
+
+const username = document.getElementById('username').value;
+socket.emit('new-user-joined', username);
+
+socket.on('user-joined', (user) => {
+    appendMessage(`${user} joined the chat`, 'right');
+});
+
+socket.on('receive', (data) => {
+    appendMessage(`${data.n}: ${data.message}`, 'left');
+});
+
+socket.on('left', (user) => {
+    appendMessage(`${user} left the chat`, 'left');
+});
+
+
+index.js:
+// index.js
+const io = require('socket.io')(8000);
+const users = {};
+
+io.on('connection', (socket) => {
+    console.log('User connected:', socket.id);
+
+    socket.on('new-user-joined', (username) => {
+        console.log('New user joined the chat:', username);
+        users[socket.id] = username;
+        socket.broadcast.emit('user-joined', username);
+    });
+
+    socket.on('send', (message) => {
+        socket.broadcast.emit('receive', { message: message, n: users[socket.id] });
+    });
+
+    socket.on('disconnect', () => {
+        const disconnectedUser = users[socket.id];
+        if (disconnectedUser) {
+            socket.broadcast.emit('left', disconnectedUser);
+            delete users[socket.id];
+        }
+    });
+});
